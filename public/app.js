@@ -37,37 +37,51 @@ cmd.controller('cmdCtrl',function($scope,$http,$sce){
     };
 
     $scope.cmd_submit = function(){
-		var cmd_array = $scope.cmd_input.split(' ');
-		switch(cmd_array[0].trim()){
-			case 'def':
-				$scope.definition(cmd_array[1].trim(),'new')
-				break;
-
-			case 'syn':
-					$scope.synonym(cmd_array[1].trim(),'new')
+    	if ($scope.cmd_input) {
+			var cmd_array = $scope.cmd_input.split(' ');
+			switch(cmd_array[0].trim()){
+				case 'def':
+					$scope.definition(cmd_array[1].trim(),'new')
 					break;
 
-			case 'ant':
-				$scope.antonym(cmd_array[1].trim(),'new')
-				break;
+				case 'syn':
+						$scope.synonym(cmd_array[1].trim(),'new')
+						break;
 
-			case 'ex':
-					$scope.example(cmd_array[1].trim(),'new')
+				case 'ant':
+					$scope.antonym(cmd_array[1].trim(),'new')
 					break;
 
-			case 'cls':
-				$scope.clearArray();
-				break;
+				case 'ex':
+						$scope.example(cmd_array[1].trim(),'new')
+						break;
 
-			default:
-				if (cmd_array[1]) {
-					var li = '<div>Enter command: ./dict '+ cmd_array[0].trim() +' '+ cmd_array[1].trim() +'</div>';
-				}else{
-					var li = '<div>Enter command: ./dict '+ cmd_array[0].trim() +'</div>';
-				}
-				li = li + '<div>'+ cmd_array[0].trim() +' is not defined</div>'
-				$scope.prompt_array.push(li)
-				$scope.cmd_input = ""
+				case 'cls':
+					$scope.clearArray();
+					break;
+
+				case 'dict':
+					var li = '<div class="repeat-div-heading">Enter command: ./dict dict '+ cmd_array[1].trim()+'</div>';
+					$scope.prompt_array.push(li)
+					$scope.cmd_input = ""
+					$scope.definition(cmd_array[1].trim())
+					$scope.synonym(cmd_array[1].trim())
+					$scope.antonym(cmd_array[1].trim())
+					$scope.example(cmd_array[1].trim())
+					break;
+
+				default:
+					if (cmd_array[1]) {
+						var li = '<div>Enter command: ./dict '+ cmd_array[0].trim() +' '+ cmd_array[1].trim() +'</div>';
+					}else{
+						var li = '<div>Enter command: ./dict '+ cmd_array[0].trim() +'</div>';
+					}
+					li = li + '<div>'+ cmd_array[0].trim() +' is not defined</div>'
+					$scope.prompt_array.push(li)
+					$scope.cmd_input = ""
+			}
+		}else{
+			$scope.word_of_day()
 		}
 	}
 
@@ -198,6 +212,38 @@ cmd.controller('cmdCtrl',function($scope,$http,$sce){
 			.catch(function(err){
 				var li = '<div class="repeat-div-heading">Enter command: ./dict ex '+ text+'</div>';
 				li = li + '<div>No examples found</div>'
+				$scope.prompt_array.push(li)
+				$scope.cmd_input = ""
+			})
+    }
+
+    $scope.word_of_day = function(){
+    	
+    	var date = new Date();
+		var year = date.getFullYear();
+		var month = date.getMonth() + 1;
+		var day = date.getDate();
+
+    	$http.get('http://api.wordnik.com:80/v4/words.json/wordOfTheDay?date='+ year+'-'+ month+ '-' + day+ '-&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5')
+			.then(function(response){
+				var li = '<div class="repeat-div-heading">Enter command: ./dict </div>';
+				li = li + '<div><b>Name:</b> '+response.data.word+'</div>'
+				li = li + '<div>Definitions:</div>'
+				for (var i = 0; i < response.data.definitions.length; i++) {
+					var li = li + '<div>'+ '<b> '+ parseInt(i + 1) +'. </b>'+ response.data.definitions[i].text+ '</div>';
+				}
+
+				li = li + '<div class="repeat-div-heading">Examples:</div>'
+				for (var i = 0; i < response.data.examples.length; i++) {
+					var li = li + '<div>'+ '<b> '+ parseInt(i + 1) +'. </b>'+ response.data.examples[i].text+ '</div>';
+				}
+				li = li + '<div><b>Note:</b> '+response.data.note+'</div>'
+				$scope.prompt_array.push(li)
+				$scope.cmd_input = ""
+			})
+			.catch(function(err){
+				var li = '<div class="repeat-div-heading">Enter command: ./dict </div>';
+				li = li + '<div>Word of the day not found</div>'
 				$scope.prompt_array.push(li)
 				$scope.cmd_input = ""
 			})
