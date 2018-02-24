@@ -1,0 +1,6 @@
+<section class="main" ng-init="focus()">
+	<div ng-repeat="prompt in prompt_array track by $index" class="repeat-div">
+		<div ng-bind-html="trustAsHtml(prompt)"></div>
+	</div>
+	<form ng-submit="cmd_submit()"><label>Enter command: ./dict </label><input ng-model="cmd_input" autocomplete="off" type="text" id="input2" ></form>
+</section>
