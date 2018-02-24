@@ -50,7 +50,15 @@ cmd.controller('cmdCtrl',function($scope,$http,$sce){
 			case 'ant':
 				$scope.antonym(cmd_array[1].trim(),'new')
 				break;
-				
+
+			case 'ex':
+					$scope.example(cmd_array[1].trim(),'new')
+					break;
+
+			case 'cls':
+				$scope.clearArray();
+				break;
+
 			default:
 				if (cmd_array[1]) {
 					var li = '<div>Enter command: ./dict '+ cmd_array[0].trim() +' '+ cmd_array[1].trim() +'</div>';
@@ -160,6 +168,36 @@ cmd.controller('cmdCtrl',function($scope,$http,$sce){
 			.catch(function(err){
 				var li = '<div class="repeat-div-heading">Enter command: ./dict ant '+ text+'</div>';
 				li = li + '<div>No antonym found</div>'
+				$scope.prompt_array.push(li)
+				$scope.cmd_input = ""
+			})
+    }
+
+    $scope.clearArray = function(){
+    	$scope.prompt_array = [];
+    	$scope.cmd_input = ""
+    }
+
+    $scope.example = function(text,command){
+    	$http.get('http://api.wordnik.com:80/v4/word.json/'+ text +'/topExample?useCanonical=false&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5')
+			.then(function(response){
+				if (response.data.text) {
+					if (command && command == 'new') {
+						var li = '<div class="repeat-div-heading">Enter command: ./dict ex '+ text+'</div>';
+					}else{
+						var li = '<div class="repeat-div-heading">Examples of '+ text+'</div>';
+					}
+					li = li + '<div>'+ response.data.text +'</div>'
+				}else{
+					var li = '<div class="repeat-div-heading">Enter command: ./dict ex '+ text+'</div>';
+					li = li + '<div>No examples found</div>'
+				}
+				$scope.prompt_array.push(li)
+				$scope.cmd_input = ""
+			})
+			.catch(function(err){
+				var li = '<div class="repeat-div-heading">Enter command: ./dict ex '+ text+'</div>';
+				li = li + '<div>No examples found</div>'
 				$scope.prompt_array.push(li)
 				$scope.cmd_input = ""
 			})
